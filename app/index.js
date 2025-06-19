@@ -1,11 +1,12 @@
-// Load env variables
 import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
 import connectDb from './config/db.js';
+import cors from 'cors';
+
 import authRoute from './routes/authRoute.js';
-import cors from 'cors';  // Import cors for handling CORS issues
+import testMailRoute from './routes/testMail.js'; // ✅ corrected
 
 const server = express();
 const PORT = process.env.PORT || 4000;
@@ -14,13 +15,13 @@ const PORT = process.env.PORT || 4000;
 connectDb();
 
 // Middleware
-server.use(cors());  // ← Add this line
+server.use(cors());
 server.use(express.json());
 
 // Routes
 server.use('/api/auth', authRoute);
+server.use('/api/testMail', testMailRoute); // ✅ fixed
 
-// Start server
 server.listen(PORT, () => {
-  console.log(` Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
