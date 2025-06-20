@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
+
 const projectSchema = mongoose.Schema({
-
-tittle: String,
-description: String,
-createdBy :{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-}
-
+    title: String, // ✅ Fixed spelling
+    description: String,
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true // ✅ Added required
+    }
 });
-const Project = mongoose.model("Project", projectSchema);
 
+const Project = mongoose.model("Project", projectSchema);
 export default Project;
