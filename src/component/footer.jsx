@@ -1,9 +1,6 @@
 import React from 'react';
 import { Box, Typography, Link, Stack, IconButton } from '@mui/material';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import PolicyRoundedIcon from '@mui/icons-material/PolicyRounded';
+
 
 function Footer() {
   return (

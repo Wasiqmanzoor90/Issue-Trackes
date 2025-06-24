@@ -139,11 +139,12 @@ function Landing() {
                 sx={{
                   color: "#fff",
                   fontFamily: `"Poppins", "Inter", "Segoe UI", Arial, sans-serif`,
-                  fontWeight: 900,
+                  fontWeight: 600,
                   letterSpacing: 0.2,
-                  fontSize: { xs: "2.2rem", md: "3.7rem" },
+                  fontSize: { xs: "1.3rem", md: "3.7rem" },
                   lineHeight: 1.1,
                   mb: 2,
+                  mt: 3,
                   textShadow: "0 3px 14px #23286688",
                 }}>
                 The Modern Bug & Issue Tracker
@@ -155,9 +156,9 @@ function Landing() {
                   color: "#b8c0e0",
                   mb: 4,
                   fontFamily: `"Inter", "Segoe UI", Arial, sans-serif`,
-                  fontSize: { xs: 19, md: 22 },
-                  fontWeight: 500,
-                  maxWidth: 540,
+                  fontSize: { xs: 14, md: 22 },
+                  fontWeight: 300,
+                  maxWidth: 440,
                   lineHeight: 1.7,
                 }}
               >

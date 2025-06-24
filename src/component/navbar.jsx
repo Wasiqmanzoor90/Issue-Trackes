@@ -60,8 +60,8 @@ function Navbar() {
               disableElevation
               sx={{
                 fontFamily: `"Poppins", "Inter", "Segoe UI", Arial, sans-serif`,
-                fontWeight: 700,
-                fontSize: { xs: '0.98rem', md: '1.07rem' },
+                fontWeight: 400,
+                fontSize: { xs: '0.8rem', md: '1.07rem' },
                 px: 2.4,
                 py: 1.1,
                 borderRadius: 2.5,
