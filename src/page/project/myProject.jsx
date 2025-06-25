@@ -8,30 +8,50 @@ import {
   Stack,
   Alert,
   Chip,
-  Button,
+  IconButton,
 } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 
-function AllProject() {
+function MyProject() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) return (window.location.href = "/login");
+    if (!token || !user?.id) return navigate("/login");
     axios
       .get("http://localhost:4000/api/projects", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setProjects(res.data))
+      .then((res) => {
+        const userProjects = res.data.filter(
+          (proj) => proj.createdBy?._id === user.id
+        );
+        setProjects(userProjects);
+      })
       .catch((err) =>
         setError(err.response?.data?.message || "Error fetching projects")
       )
       .finally(() => setLoading(false));
-  }, [token]);
+  }, []);
+
+  // Delete handler
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    try {
+      await axios.delete(`http://localhost:4000/api/projects/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjects((prev) => prev.filter((p) => p._id !== id));
+    } catch (err) {
+      setError(err.response?.data?.message || "Error deleting project");
+    }
+  };
 
   if (!token) return null;
   if (loading)
@@ -51,22 +71,6 @@ function AllProject() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f7fa", pt: 7, px: 2 }}>
-    
-<Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 , marginRight:'30px' }}>
-  <Button
-       onClick={() => navigate("/project/myProject")}
-    variant="contained"
-    sx={{
-      bgcolor: "#6c6fed",
-      color: "#fff",
-      "&:hover": { bgcolor: "#5a5adf" },
-      borderRadius:'15px',
-    }}
-  >
-    My Project
-  </Button>
-</Box>
-
       <Box
         sx={{
           maxWidth: 700,
@@ -88,7 +92,7 @@ function AllProject() {
             color: "#23275c",
           }}
         >
-          All Projects
+          My Projects
         </Typography>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -105,7 +109,7 @@ function AllProject() {
           </Box>
         ) : (
           <Stack spacing={3}>
-            {projects.map(({ _id, title, description, status, createdBy }) => (
+            {projects.map(({ _id, title, description, status }) => (
               <Paper
                 key={_id}
                 elevation={1}
@@ -121,6 +125,7 @@ function AllProject() {
                     background: "#f0f4ff",
                   },
                   cursor: "pointer",
+                  position: "relative",
                 }}
               >
                 <Stack direction="row" alignItems="center" spacing={2} mb={1}>
@@ -145,8 +150,15 @@ function AllProject() {
                       }}
                     />
                   )}
+                  <IconButton
+                    aria-label="delete"
+                    color="error"
+                    onClick={() => handleDelete(_id)}
+                    sx={{ ml: 1 }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 </Stack>
-            
                 <Typography
                   color="text.secondary"
                   sx={{ minHeight: 36, fontSize: 16 }}
@@ -157,15 +169,6 @@ function AllProject() {
                     </span>
                   )}
                 </Typography>
-                    {createdBy && (
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    <b>By {createdBy.name}</b>
-                  </Typography>
-                )}
               </Paper>
             ))}
           </Stack>
@@ -175,4 +178,4 @@ function AllProject() {
   );
 }
 
-export default AllProject;
+export default MyProject;

@@ -10,6 +10,7 @@ import Create from './page/project/create';
 import CreateIssue from './page/issue/create';
 import AllProject from './page/project/allProject';
 import AllIssue from './page/issue/allIssue';
+import MyProject from './page/project/myProject';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path = '/project/allProject' element={<AllProject/>}/>
         <Route path='/issue/create' element={<CreateIssue/>}/>
         <Route path = 'issue/allIssue' element={<AllIssue/>}/>
+        <Route path='/project/myProject' element={<MyProject/>}/>
       </Routes>
       <Footer/>
     </BrowserRouter>
