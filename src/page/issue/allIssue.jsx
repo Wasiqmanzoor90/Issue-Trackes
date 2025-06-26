@@ -29,6 +29,7 @@ function AllIssue() {
       })
       .then((res) => {
         // Handle both array and {issues: [...]} API responses
+        
         if (Array.isArray(res.data)) {
           setIssues(res.data);
         } else if (Array.isArray(res.data.issues)) {
@@ -47,6 +48,7 @@ function AllIssue() {
       .finally(() => setLoading(false));
   }, [token]);
 
+  
   if (!token) return null;
   if (loading)
     return (
@@ -62,6 +64,7 @@ function AllIssue() {
         <CircularProgress size={54} thickness={5} color="primary" />
       </Box>
     );
+
 
   function getDisplayName(userOrId) {
     if (!userOrId) return "Unknown";

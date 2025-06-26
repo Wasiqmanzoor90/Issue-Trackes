@@ -9,6 +9,7 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import MailRoundedIcon from '@mui/icons-material/MailRounded';
 import PersonAddAltRoundedIcon from '@mui/icons-material/PersonAddAltRounded';
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 const navLinks = [
   { label: 'Home', icon: <HomeRoundedIcon sx={{ fontSize: 20 }} />, href: '/' },
@@ -17,13 +18,16 @@ const navLinks = [
   { label: 'Sign Up', icon: <PersonAddAltRoundedIcon sx={{ fontSize: 20 }} />, href: '/signup' },
 ];
 
+
 function Navbar() {
+  const navigate = useNavigate();
   // Color theme extracted from image
   const background = "#1a1c4b";
   const textColor = "#fff";
   const navLinkColor = "#fff";
   const signUpBg = "#2e3180";
   const signUpHover = "#3b3fa1";
+  
 
   return (
     <AppBar
@@ -52,10 +56,10 @@ function Navbar() {
         <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 } }}>
           {navLinks.map((link, i) => (
             <Button
+            onClick={()=>navigate('/login')}
               key={link.label}
               color="inherit"
               startIcon={link.icon}
-              href={link.href}
               variant={link.label === 'Sign Up' ? 'contained' : 'text'}
               disableElevation
               sx={{
