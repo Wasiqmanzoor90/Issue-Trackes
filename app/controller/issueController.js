@@ -74,27 +74,32 @@ export const getIssueById = async (req, res) => {
 
 //update issue
 export const updateIssue = async (req, res) => {
-  const { issueId, userId } = req.params;
+  const { issueId } = req.params;
   const { title, description, projectId, assignedTo, priority, status } = req.body;
 
-  // Validate ObjectId
   if (!mongoose.Types.ObjectId.isValid(issueId)) {
     return res.status(400).json({ message: "Invalid issue ID format" });
   }
 
   try {
     const issue = await Issue.findById(issueId);
-
     if (!issue) {
       return res.status(404).json({ message: "Issue not found" });
     }
 
-    // Check if the user is allowed to update the issue
-    if (issue.assignedTo?.toString() !== userId) {
-      return res.status(403).json({ message: "Only the assigned user can update this issue" });
+    // Always use req.user.id from middleware
+    const userId = req.user.id;
+
+    if (
+      issue.assignedTo?.toString() !== userId &&
+      req.user.role !== "Admin" &&
+      issue.createdBy?.toString() !== userId
+    ) {
+      return res.status(403).json({
+        message: "Only assigned user, creator, or admin can update this issue",
+      });
     }
 
-    // Update fields only if provided
     if (title?.trim()) issue.title = title.trim();
     if (description?.trim()) issue.description = description.trim();
     if (projectId && mongoose.Types.ObjectId.isValid(projectId)) issue.projectId = projectId;
@@ -104,18 +109,18 @@ export const updateIssue = async (req, res) => {
 
     await issue.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Issue updated successfully",
       issue,
     });
-
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Internal Server Error",
       error: error.message,
     });
   }
 };
+
 
 
 export const deleteIssue = async (req, res) => {

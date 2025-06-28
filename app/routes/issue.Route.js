@@ -9,7 +9,7 @@ router.use(authMiddleware);
 router.post('/',createIssue);
 router.get('/', getIssueByProject);
 router.get('/:id', getIssueById);
-router.put('/:issueId/:userId', updateIssue);
+router.put('/:issueId', updateIssue);
 
 router.delete('/:id',deleteIssue); 
 
