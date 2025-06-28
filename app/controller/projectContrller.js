@@ -30,21 +30,23 @@ export const getAllProjects = async (req, res) => {
 
 
 
-// Get a project by ID
+// Get all projects created by a specific user
 export const getProjectById = async (req, res) => {
+  try {
+    const { id } = req.params; // 👈 this is userId
 
-    try {
+    const projects = await Project.find({ createdBy: id }).populate('createdBy', 'name email');
 
-        const project = await Project.findById(req.params.id).populate('createdBy', 'name email');
-        if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
-        }
-        res.status(200).json(project);
-    } catch (error) {
-
-        res.status(500).json({ message: 'Error fetching project', error: error.message });
+    if (!projects || projects.length === 0) {
+      return res.status(404).json({ message: 'No projects found for this user' });
     }
+
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user projects', error: error.message });
+  }
 };
+
 
 
 //delete a project

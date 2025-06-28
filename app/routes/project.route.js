@@ -11,7 +11,7 @@ router.use(authMiddleware);
 router.post('/', createProject); // Create a new project
 router.get('/', getAllProjects); // Get all projects
 router.get('/:id', getProjectById); // Should be '/Byid/:id'
-router.post('/:id', deleteProject); // Should be '/delete/:id'
+router.delete('/:id', deleteProject); // Should be '/delete/:id'
 
 
 export default router;

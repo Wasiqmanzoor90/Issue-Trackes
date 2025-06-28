@@ -1,14 +1,34 @@
 import User from '../model/user.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { use } from 'react';
+
+
+
+export const checkAuth = (req, res) => {
+    try {
+        res.status(200).json({
+            success: true,
+            message: "User is authenticated",
+            user: req.user
+
+        })
+    } catch (error) {
+        res.status(401).json({
+            success: false,
+            message: 'Token verification failed',
+            error: error.message
+        });
+    }
+}
 
 
 const register = async (req, res) => {
- 
+
     const { name, email, password, role } = req.body;
     try {
-        
-        if(!name || !email || !password) {
+
+        if (!name || !email || !password) {
             return res.status(400).json({ message: "Please provide all required fields" });
         }
         const existUser = await User.findOne({ email });
