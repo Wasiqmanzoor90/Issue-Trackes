@@ -43,27 +43,34 @@ function Dashboard() {
   const getAuthToken = () => {
     return localStorage.getItem("token");
   };
-
+const client = JSON.parse(localStorage.getItem("user")||"{}")
+console.log("heello",client.id);
   const fetchProjects = async () => {
-    try {
-      const token = getAuthToken();
-      const res = await axios.get("http://localhost:4000/api/projects", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = res.data;
-      setProjects(data);
-      setDisplayedProjects(data.slice(0, INITIAL_DISPLAY_COUNT));
-      setShowMoreProjects(data.length > INITIAL_DISPLAY_COUNT);
-    } catch (error) {
-      setProjects([]);
-      setDisplayedProjects([]);
-      setShowMoreProjects(false);
-    } finally {
-      setLoadingProjects(false);
-    }
-  };
+  try {
+    const token = getAuthToken();
+    
+    // Optional: include client.id in query if needed
+    // Example: `http://localhost:4000/api/projects?clientId=${client.id}`
+
+    const res = await axios.get(`http://localhost:4000/api/projects/${client.id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = res.data;
+    setProjects(data);
+    setDisplayedProjects(data.slice(0, INITIAL_DISPLAY_COUNT));
+    setShowMoreProjects(data.length > INITIAL_DISPLAY_COUNT);
+  } catch (error) {
+    setProjects([]);
+    setDisplayedProjects([]);
+    setShowMoreProjects(false);
+  } finally {
+    setLoadingProjects(false);
+  }
+};
+
 
   const fetchIssues = async () => {
     try {
@@ -99,7 +106,7 @@ function Dashboard() {
     const newCount = displayedProjects.length + INITIAL_DISPLAY_COUNT;
     setDisplayedProjects(projects.slice(0, newCount));
     setShowMoreProjects(newCount < projects.length);
-    navigate("/project/allProject");
+    navigate("/project/myProject");
   };
 
   // Load more issues

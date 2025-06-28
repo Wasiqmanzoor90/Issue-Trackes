@@ -11,6 +11,7 @@ import CreateIssue from './page/issue/create';
 import AllProject from './page/project/allProject';
 import AllIssue from './page/issue/allIssue';
 import MyProject from './page/project/myProject';
+import MyIssue from './page/issue/myIssue';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path='/issue/create' element={<CreateIssue/>}/>
         <Route path = 'issue/allIssue' element={<AllIssue/>}/>
         <Route path='/project/myProject' element={<MyProject/>}/>
+        <Route path='issue/myIssue' element={<MyIssue/>} />
       </Routes>
       <Footer/>
     </BrowserRouter>

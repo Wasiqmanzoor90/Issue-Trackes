@@ -9,15 +9,27 @@ import {
   Alert,
   Chip,
   IconButton,
+  Button,
+  Tooltip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Snackbar,
 } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 
 function MyProject() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const navigate = useNavigate();
@@ -40,17 +52,34 @@ function MyProject() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Delete handler
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this project?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
     try {
-      await axios.delete(`http://localhost:4000/api/projects/${id}`, {
+      await axios.delete(`http://localhost:4000/api/projects/${deleteId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProjects((prev) => prev.filter((p) => p._id !== id));
+      setProjects((prev) => prev.filter((p) => p._id !== deleteId));
+      setSnackbar({ open: true, message: "Project deleted successfully", severity: "success" });
     } catch (err) {
-      setError(err.response?.data?.message || "Error deleting project");
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.message || "Error deleting project",
+        severity: "error",
+      });
     }
+    setDeleteId(null);
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/project/edit/${id}`);
+  };
+
+  const handleView = (id) => {
+    navigate(`/project/details/${id}`);
+  };
+
+  const handleAddProject = () => {
+    navigate("/project/create");
   };
 
   if (!token) return null;
@@ -71,6 +100,24 @@ function MyProject() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f7fa", pt: 7, px: 2 }}>
+      {/* Top Action Bar */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, marginRight: '30px' }}>
+        <Button
+          onClick={handleAddProject}
+          variant="contained"
+          startIcon={<AddIcon />}
+          sx={{
+            bgcolor: "#6c6fed",
+            color: "#fff",
+            "&:hover": { bgcolor: "#5a5adf" },
+            borderRadius: "15px",
+            fontWeight: 700
+          }}
+        >
+          Add Project
+        </Button>
+      </Box>
+
       <Box
         sx={{
           maxWidth: 700,
@@ -109,10 +156,11 @@ function MyProject() {
           </Box>
         ) : (
           <Stack spacing={3}>
-            {projects.map(({ _id, title, description, status }) => (
+            {projects.map(({ _id, title, description, status, createdAt, updatedAt }) => (
               <Paper
                 key={_id}
-                elevation={1}
+                elevation={2}
+                onClick={() => handleView(_id)}
                 sx={{
                   p: 2.5,
                   borderRadius: 3,
@@ -150,18 +198,30 @@ function MyProject() {
                       }}
                     />
                   )}
-                  <IconButton
-                    aria-label="delete"
-                    color="error"
-                    onClick={() => handleDelete(_id)}
-                    sx={{ ml: 1 }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+                  <Tooltip title="Edit" arrow>
+                    <IconButton
+                      aria-label="edit"
+                      color="primary"
+                      onClick={e => { e.stopPropagation(); handleEdit(_id); }}
+                      sx={{ ml: 1 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete" arrow>
+                    <IconButton
+                      aria-label="delete"
+                      color="error"
+                      onClick={e => { e.stopPropagation(); setDeleteId(_id); }}
+                      sx={{ ml: 1 }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
                 </Stack>
                 <Typography
                   color="text.secondary"
-                  sx={{ minHeight: 36, fontSize: 16 }}
+                  sx={{ minHeight: 36, fontSize: 16, mb: 1.5 }}
                 >
                   {description || (
                     <span style={{ color: "#bdbdbd" }}>
@@ -169,11 +229,46 @@ function MyProject() {
                     </span>
                   )}
                 </Typography>
+                <Stack direction="row" spacing={2} sx={{ mt: 0.5 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Created: {createdAt ? new Date(createdAt).toLocaleDateString() : "-"}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Updated: {updatedAt ? new Date(updatedAt).toLocaleDateString() : "-"}
+                  </Typography>
+                </Stack>
               </Paper>
             ))}
           </Stack>
         )}
       </Box>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        aria-labelledby="delete-dialog-title"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Project?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this project? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteId(null)}>Cancel</Button>
+          <Button color="error" onClick={handleDelete}>Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for actions */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        message={snackbar.message}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </Box>
   );
 }

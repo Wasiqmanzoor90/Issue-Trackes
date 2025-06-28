@@ -7,17 +7,18 @@ import {
   Stack,
   Chip,
   Alert,
-  Avatar,
+  Button
 } from "@mui/material";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function AllIssue() {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-
+const navigate = useNavigate();
   useEffect(() => {
     if (!token) {
       window.location.href = "/login";
@@ -84,6 +85,21 @@ function AllIssue() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f7fa", pt: 7, px: 2 }}>
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 , marginRight:'30px' }}>
+        <Button
+             onClick={() => navigate("/issue/myIssue")}
+          variant="contained"
+          sx={{
+            bgcolor: "#6c6fed",
+            color: "#fff",
+            "&:hover": { bgcolor: "#5a5adf" },
+            borderRadius:'15px',
+          }}
+        >
+          MY ISSUE
+        </Button>
+      </Box>
       <Box
         sx={{
           maxWidth: 750,
