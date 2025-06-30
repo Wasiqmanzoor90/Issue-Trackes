@@ -1,5 +1,6 @@
 
 import Issue from "../model/issue.js";
+import Comment from "../model/comment.js";
 import mongoose from "mongoose";
 //create issue
 export const createIssue = async (req, res) => {
@@ -152,3 +153,43 @@ export const deleteIssue = async (req, res) => {
     });
   }
 };
+
+
+
+
+export  const  createComment = async (req, res)=>{
+  const {text, issueId} = req.body;
+  try {
+    if(!text || !issueId)
+    {
+      return res.status(400).json({message: 'Text and issueId are required'});
+    }
+
+    const comment = new Comment({
+        text,
+      issueId,
+      userId: req.user.UserId, // from auth middleware
+    });
+    await comment.save();
+    res.status(200).json({message:'Comment added', comment});
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to add comment', error: error.message });
+  }
+}
+
+
+
+export const getComment = async(req, res)=>{
+
+  try {
+    const {issueId} = req.params;
+    const comment = await Comment.find({issueId})
+    .populate("userId", "name")
+     .sort({ createdAt: -1 }); // newest first
+
+     res.status(200).json({message:"Comments fetched successfully", comment});
+
+  } catch (error) {
+    res.status(200).json({ message: "Failed to fetch comments",error : error.message});
+  }
+}
