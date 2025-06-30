@@ -31,25 +31,23 @@ function MyIssue() {
   // Get user data once
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-console.log("Logged-in user:", user);
   const userId = user?.id;
-console.log(userId,"ok ")
+
   // Delete issue by id and update state
-const deleteIssue = async (id) => {
-  if (!id) return;
-  try {
-    await axios.delete(`http://localhost:4000/api/issue/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  const deleteIssue = async (id) => {
+    if (!id) return;
+    try {
+      await axios.delete(`http://localhost:4000/api/issue/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    // Remove from UI without refetch
-    setIssues((prev) => prev.filter((issue) => issue._id !== id));
-  } catch (error) {
-    setError("Failed to delete issue. Please try again.");
-    console.log(error);
-  }
-};
-
+      // Remove from UI without refetch
+      setIssues((prev) => prev.filter((issue) => issue._id !== id));
+    } catch (error) {
+      setError("Failed to delete issue. Please try again.");
+      console.log(error);
+    }
+  };
 
   // Fetch issues with useCallback to prevent unnecessary re-renders
   const fetchIssues = useCallback(async () => {
@@ -97,10 +95,11 @@ const deleteIssue = async (id) => {
   // Update issue status
   const updateIssueStatus = async (status) => {
     if (!selectedIssueId || !userId) return;
-
+    console.log("Selected Issue ID:", selectedIssueId);
+    console.log("Logged-in User ID:", userId);
     try {
       await axios.put(
-        `http://localhost:4000/api/issue/${selectedIssueId}/${userId}`,
+        `http://localhost:4000/api/issue/${selectedIssueId}`,
         { status },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -293,8 +292,7 @@ const deleteIssue = async (id) => {
                       <IconButton
                         aria-label="delete"
                         color="error"
-                    onClick={() => deleteIssue(_id)}
-
+                        onClick={() => deleteIssue(_id)}
                         sx={{ ml: 1 }}
                       >
                         <DeleteIcon />

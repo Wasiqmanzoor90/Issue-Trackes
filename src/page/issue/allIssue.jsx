@@ -7,9 +7,13 @@ import {
   Stack,
   Chip,
   Alert,
-  Button
+  Button,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import BugReportIcon from "@mui/icons-material/BugReport";
+import CommentIcon from "@mui/icons-material/Comment";
+
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +22,7 @@ function AllIssue() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-const navigate = useNavigate();
+  const navigate = useNavigate();
   useEffect(() => {
     if (!token) {
       window.location.href = "/login";
@@ -30,7 +34,7 @@ const navigate = useNavigate();
       })
       .then((res) => {
         // Handle both array and {issues: [...]} API responses
-        
+
         if (Array.isArray(res.data)) {
           setIssues(res.data);
         } else if (Array.isArray(res.data.issues)) {
@@ -41,15 +45,14 @@ const navigate = useNavigate();
       })
       .catch((err) =>
         setError(
-          err.response?.data?.message ||
-          err.message ||
-          "Error fetching issues"
+          err.response?.data?.message || err.message || "Error fetching issues"
         )
       )
+
       .finally(() => setLoading(false));
   }, [token]);
 
-  
+ 
   if (!token) return null;
   if (loading)
     return (
@@ -66,11 +69,17 @@ const navigate = useNavigate();
       </Box>
     );
 
-
   function getDisplayName(userOrId) {
     if (!userOrId) return "Unknown";
     if (typeof userOrId === "object") {
-      return userOrId.name || userOrId.fullName || userOrId.username || userOrId.email || userOrId._id || "Unknown";
+      return (
+        userOrId.name ||
+        userOrId.fullName ||
+        userOrId.username ||
+        userOrId.email ||
+        userOrId._id ||
+        "Unknown"
+      );
     }
     return userOrId;
   }
@@ -78,23 +87,31 @@ const navigate = useNavigate();
   function getProjectTitle(projectOrId) {
     if (!projectOrId) return "Unknown";
     if (typeof projectOrId === "object") {
-      return projectOrId.title || projectOrId.name || projectOrId._id || "Unknown";
+      return (
+        projectOrId.title || projectOrId.name || projectOrId._id || "Unknown"
+      );
     }
     return projectOrId;
   }
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f7fa", pt: 7, px: 2 }}>
-
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 , marginRight:'30px' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          mb: 2,
+          marginRight: "30px",
+        }}
+      >
         <Button
-             onClick={() => navigate("/issue/myIssue")}
+          onClick={() => navigate("/issue/myIssue")}
           variant="contained"
           sx={{
             bgcolor: "#6c6fed",
             color: "#fff",
             "&:hover": { bgcolor: "#5a5adf" },
-            borderRadius:'15px',
+            borderRadius: "15px",
           }}
         >
           MY ISSUE
@@ -199,22 +216,20 @@ const navigate = useNavigate();
                         label={priority}
                         size="small"
                         sx={{
-                          bgcolor:
-                            ["high", "critical"].includes(
-                              priority.toLowerCase()
-                            )
-                              ? "#fef2f2"
-                              : priority.toLowerCase() === "medium"
-                              ? "#fff7ed"
-                              : "#f0fdf4",
-                          color:
-                            ["high", "critical"].includes(
-                              priority.toLowerCase()
-                            )
-                              ? "#ef4444"
-                              : priority.toLowerCase() === "medium"
-                              ? "#f78c6c"
-                              : "#43bfa0",
+                          bgcolor: ["high", "critical"].includes(
+                            priority.toLowerCase()
+                          )
+                            ? "#fef2f2"
+                            : priority.toLowerCase() === "medium"
+                            ? "#fff7ed"
+                            : "#f0fdf4",
+                          color: ["high", "critical"].includes(
+                            priority.toLowerCase()
+                          )
+                            ? "#ef4444"
+                            : priority.toLowerCase() === "medium"
+                            ? "#f78c6c"
+                            : "#43bfa0",
                           fontWeight: 500,
                           borderRadius: 1,
                         }}
@@ -233,18 +248,12 @@ const navigate = useNavigate();
                   </Typography>
                   <Stack direction="row" spacing={2} mb={1}>
                     {projectId && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                      >
+                      <Typography variant="body2" color="text.secondary">
                         <b>Project:</b> {getProjectTitle(projectId)}
                       </Typography>
                     )}
                     {assignedTo && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                      >
+                      <Typography variant="body2" color="text.secondary">
                         <b>Created By:</b> {getDisplayName(assignedTo)}
                       </Typography>
                     )}
@@ -265,6 +274,14 @@ const navigate = useNavigate();
                   >
                     Issue ID: {_id}
                   </Typography>
+
+                 
+<Tooltip title="Comments" arrow>
+  <IconButton color="primary" onClick={() => navigate(`/issue/comment/${_id}`)}>
+    <CommentIcon />
+  </IconButton>
+</Tooltip>
+
                 </Paper>
               )
             )}
