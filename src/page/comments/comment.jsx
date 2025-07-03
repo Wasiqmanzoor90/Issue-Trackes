@@ -33,7 +33,7 @@ function Comment() {
     } else {
       fetchComment(id);
     }
-    // eslint-disable-next-line
+    // eslint-disable-next-linee
   }, [token, id]);
 
   const fetchComment = async (issueId) => {
