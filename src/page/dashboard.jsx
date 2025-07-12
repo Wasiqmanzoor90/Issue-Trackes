@@ -27,6 +27,7 @@ function Dashboard() {
       return {};
     }
   });
+
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingIssues, setLoadingIssues] = useState(true);
   const [projects, setProjects] = useState([]);
@@ -39,56 +40,49 @@ function Dashboard() {
 
   const INITIAL_DISPLAY_COUNT = 3;
 
-  // Function to get auth token
+  // Get token from localStorage
   const getAuthToken = () => {
     return localStorage.getItem("token");
   };
-const client = JSON.parse(localStorage.getItem("user")||"{}")
-console.log("heello",client.id);
+
+  const client = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // Fetch projects created by the user
   const fetchProjects = async () => {
-  try {
-    const token = getAuthToken();
-    
-    // Optional: include client.id in query if needed
-    // Example: `http://localhost:4000/api/projects?clientId=${client.id}`
+    try {
+      const token = getAuthToken();
+      const res = await axios.get(`http://localhost:4000/api/projects/${client.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const res = await axios.get(`http://localhost:4000/api/projects/${client.id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const data = res.data;
+      setProjects(data);
+      setDisplayedProjects(data.slice(0, INITIAL_DISPLAY_COUNT));
+      setShowMoreProjects(data.length > INITIAL_DISPLAY_COUNT);
+    } catch (error) {
+      setProjects([]);
+      setDisplayedProjects([]);
+      setShowMoreProjects(false);
+    } finally {
+      setLoadingProjects(false);
+    }
+  };
 
-    const data = res.data;
-    setProjects(data);
-    setDisplayedProjects(data.slice(0, INITIAL_DISPLAY_COUNT));
-    setShowMoreProjects(data.length > INITIAL_DISPLAY_COUNT);
-  } catch (error) {
-    setProjects([]);
-    setDisplayedProjects([]);
-    setShowMoreProjects(false);
-  } finally {
-    setLoadingProjects(false);
-  }
-};
-
-
+  // Fetch all issues
   const fetchIssues = async () => {
     try {
       const token = getAuthToken();
-      // If your backend returns { issues: [...] }, use res.data.issues, else use res.data
       let data = [];
       const res = await axios.get("http://localhost:4000/api/issue/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       if (Array.isArray(res.data)) {
         data = res.data;
       } else if (Array.isArray(res.data.issues)) {
         data = res.data.issues;
-      } else {
-        data = [];
       }
+
       setIssues(data);
       setDisplayedIssues(data.slice(0, INITIAL_DISPLAY_COUNT));
       setShowMoreIssues(data.length > INITIAL_DISPLAY_COUNT);
@@ -101,7 +95,7 @@ console.log("heello",client.id);
     }
   };
 
-  // Load more projects
+  // Load more projects and navigate to full project list
   const loadMoreProjects = () => {
     const newCount = displayedProjects.length + INITIAL_DISPLAY_COUNT;
     setDisplayedProjects(projects.slice(0, newCount));
@@ -109,7 +103,7 @@ console.log("heello",client.id);
     navigate("/project/myProject");
   };
 
-  // Load more issues
+  // Load more issues and navigate to full issue list
   const loadMoreIssues = () => {
     const newCount = displayedIssues.length + INITIAL_DISPLAY_COUNT;
     setDisplayedIssues(issues.slice(0, newCount));
@@ -117,6 +111,7 @@ console.log("heello",client.id);
     navigate("/issue/allIssue");
   };
 
+  // Check user authorization on mount
   useEffect(() => {
     (async () => {
       const result = await isAuthorized();
@@ -124,15 +119,16 @@ console.log("heello",client.id);
     })();
   }, []);
 
+  // Fetch data only if authorized
   useEffect(() => {
     if (authorized === false) navigate("/login");
     if (authorized) {
       fetchProjects();
       fetchIssues();
     }
-    // eslint-disable-next-line
   }, [authorized]);
 
+  // Show skeleton while checking auth
   if (authorized === null)
     return (
       <Box sx={{ p: 5, textAlign: "center" }}>
@@ -145,6 +141,7 @@ console.log("heello",client.id);
         />
       </Box>
     );
+
   if (authorized === false) return null;
 
   return (
@@ -158,6 +155,7 @@ console.log("heello",client.id);
         gap: 3,
       }}
     >
+      {/* Welcome Section */}
       <Stack direction="row" alignItems="center" gap={2} mb={3}>
         <Avatar
           sx={{
@@ -180,16 +178,45 @@ console.log("heello",client.id);
         </Box>
       </Stack>
 
+      {/* View All Navigation Buttons */}
+      <Stack direction="row" spacing={2}>
+        <Button
+          variant="outlined"
+          onClick={() => navigate("/project/myProject")}
+          sx={{
+            borderColor: "#6c6fed",
+            color: "#6c6fed",
+            fontWeight: 600,
+            fontSize: 14,
+            borderRadius: 2,
+            textTransform: "none",
+          }}
+        >
+          View All Projects
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => navigate("/issue/allIssue")}
+          sx={{
+            borderColor: "#f78c6c",
+            color: "#f78c6c",
+            fontWeight: 600,
+            fontSize: 14,
+            borderRadius: 2,
+            textTransform: "none",
+          }}
+        >
+          View All Issues
+        </Button>
+      </Stack>
+
+
+      {/* Grid layout for Projects, Issues, and Stats */}
       <Grid container spacing={3}>
-        {/* My Projects */}
+        {/* My Projects Card */}
         <Grid item xs={12} md={4}>
           <Paper elevation={4} sx={{ p: 3, borderRadius: 3 }}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              mb={2}
-            >
+            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
               <Stack direction="row" alignItems="center" gap={1}>
                 <FolderIcon sx={{ color: "#6c6fed" }} />
                 <Typography variant="h6" fontWeight={600}>
@@ -215,12 +242,7 @@ console.log("heello",client.id);
             <Stack gap={1}>
               {loadingProjects
                 ? [1, 2].map((i) => (
-                    <Skeleton
-                      key={i}
-                      variant="rectangular"
-                      height={36}
-                      sx={{ borderRadius: 2 }}
-                    />
+                    <Skeleton key={i} variant="rectangular" height={36} sx={{ borderRadius: 2 }} />
                   ))
                 : displayedProjects.length > 0
                 ? displayedProjects.map((project) => (
@@ -270,15 +292,10 @@ console.log("heello",client.id);
           </Paper>
         </Grid>
 
-        {/* Recent Issues */}
+        {/* Recent Issues Card */}
         <Grid item xs={12} md={4}>
           <Paper elevation={4} sx={{ p: 3, borderRadius: 3 }}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              mb={2}
-            >
+            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
               <Stack direction="row" alignItems="center" gap={1}>
                 <BugReportIcon sx={{ color: "#f78c6c" }} />
                 <Typography variant="h6" fontWeight={600}>
@@ -304,12 +321,7 @@ console.log("heello",client.id);
             <Stack gap={1}>
               {loadingIssues
                 ? [1, 2].map((i) => (
-                    <Skeleton
-                      key={i}
-                      variant="rectangular"
-                      height={36}
-                      sx={{ borderRadius: 2 }}
-                    />
+                    <Skeleton key={i} variant="rectangular" height={36} sx={{ borderRadius: 2 }} />
                   ))
                 : displayedIssues.length > 0
                 ? displayedIssues.map((issue) => (
@@ -381,7 +393,7 @@ console.log("heello",client.id);
           </Paper>
         </Grid>
 
-        {/* Stats */}
+        {/* Stats Card */}
         <Grid item xs={12} md={4}>
           <Paper elevation={4} sx={{ p: 3, borderRadius: 3 }}>
             <Stack direction="row" alignItems="center" gap={1} mb={2}>
@@ -391,15 +403,11 @@ console.log("heello",client.id);
               </Typography>
             </Stack>
             <Stack gap={1}>
-              <Typography fontWeight={500}>
-                Total Projects: {projects.length}
-              </Typography>
+              <Typography fontWeight={500}>Total Projects: {projects.length}</Typography>
               <Typography fontWeight={500}>
                 Open Issues: {issues.filter((i) => i.status === "Open").length}
               </Typography>
-              <Typography fontWeight={500}>
-                Total Issues: {issues.length}
-              </Typography>
+              <Typography fontWeight={500}>Total Issues: {issues.length}</Typography>
             </Stack>
           </Paper>
         </Grid>

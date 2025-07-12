@@ -31,6 +31,7 @@ function App() {
         <Route path='/project/myProject' element={<MyProject/>}/>
         <Route path='issue/myIssue' element={<MyIssue/>} />
         <Route path='/issue/comment/:id' element={<Comment />} />
+        
 
       </Routes>
       <Footer/>
